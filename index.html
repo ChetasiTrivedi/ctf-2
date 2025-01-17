@@ -1,4 +1,3 @@
-<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -143,7 +142,7 @@
     <!-- Step 2 -->
     <div id="step2" class="step">
       <h2>Step 2</h2>
-      <p><strong>Hint:</strong> "The street where the detective resides holds secrets. Seek patterns in the ordinary."</p>
+      
       <div class="image-clue">
         <img src="hidden_clue.png" alt="Hidden Clue">
       </div>
@@ -167,7 +166,7 @@
     </div>
 
     <!-- Step 4: Congratulations -->
-    <div id="flag" class="step"></div>
+    <div id="flag" class="step"> showCongratsMessage()</div>
 
     <footer>
       <p>Inspired by Sherlock Holmes | <strong>The Game is Afoot!</strong></p>
@@ -175,52 +174,66 @@
   </div>
 
   <script>
-    function checkStep1() {
-      const answer1 = document.getElementById('step1_answer').value.trim();
-      const correctAnswer1 = "SHERLOCK_SOLVE_THE_FIRST_PUDLE"; // Answer to the image-based clue
-      if (answer1 === correctAnswer1) {
-        document.getElementById('step1').classList.remove('active');
-        document.getElementById('step2').classList.add('active');
-      } else {
-        alert("Incorrect! Try again.");
-      }
-    }
+    async function checkAnswer(step, answer) {
+  try {
+    const response = await fetch('http://localhost:3000/check-answer', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ step, answer })
+    });
 
-    function checkStep2() {
-      const answer2 = document.getElementById('step2_answer').value.trim();
-      const correctAnswer2 = "221B Baker Street holds secrets; find the pattern in the ordinary.";
-      if (answer2 === correctAnswer2) {
-        document.getElementById('step2').classList.remove('active');
-        document.getElementById('step3').classList.add('active');
-      } else {
-        alert("Incorrect! Try again.");
-      }
-    }
+    const result = await response.json();
+    return result.success;
+  } catch (error) {
+    console.error("Error validating answer:", error);
+    alert("Server error! Please try again later.");
+    return false;
+  }
+}
 
-    function checkStep3() {
-      const answer3 = document.getElementById('step3_answer').value.trim();
-      const correctAnswer3 = "FLAG{221B_B4k3r_StR33t_Myst3ry_C0mpl3x!}";
-      if (answer3 === correctAnswer3) {
-        document.getElementById('step3').classList.remove('active');
-        showCongratsMessage();
-      } else {
-        alert("Incorrect! Try again.");
-      }
-    }
+async function checkStep1() {
+  const answer1 = document.getElementById('step1_answer').value.trim();
+  if (await checkAnswer('step1', answer1)) {
+    document.getElementById('step1').classList.remove('active');
+    document.getElementById('step2').classList.add('active');
+  } else {
+    alert("Incorrect! Try again.");
+  }
+}
 
-    function showCongratsMessage() {
+async function checkStep2() {
+  const answer2 = document.getElementById('step2_answer').value.trim();
+  if (await checkAnswer('step2', answer2)) {
+    document.getElementById('step2').classList.remove('active');
+    document.getElementById('step3').classList.add('active');
+  } else {
+    alert("Incorrect! Try again.");
+  }
+}
+
+async function checkStep3() {
+  const answer3 = document.getElementById('step3_answer').value.trim();
+  if (await checkAnswer('step3', answer3)) {
+    document.getElementById('step3').classList.remove('active');
+    showCongratsMessage();
+  } else {
+    alert("Incorrect! Try again.");
+  }
+}
+function showCongratsMessage() {
       const congratsMessage = `
         <div class="congrats">
           <h2>Congratulations!</h2>
           <p>You have successfully solved the Sherlock-themed treasure hunt.</p>
-          <p>The final flag is:</p>
-          <code>FLAG{221B_B4k3r_StR33t_Myst3ry_C0mpl3x!}</code>
+          
           <p>Well done, detective!</p>
         </div>
       `;
       document.getElementById('flag').innerHTML = congratsMessage;
       document.getElementById('flag').classList.add('active');
     }
+
+
   </script>
 </body>
 </html>
